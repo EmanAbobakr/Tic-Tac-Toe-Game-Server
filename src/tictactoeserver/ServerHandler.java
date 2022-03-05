@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import tictactoelibrary.LoginModel;
 import tictactoelibrary.SignUpModel;
+import java.lang.Thread;
 
 /**
  *
@@ -39,12 +40,11 @@ public class ServerHandler implements Runnable{
     static Vector<ServerHandler> clientsVector = new Vector<ServerHandler>();
     public ServerHandler(Socket cs) {
         try {
-            System.out.println("ServerHandler fun ");
-            dis = new ObjectInputStream(cs.getInputStream());
+            System.out.println("ServerHandler fun ");            
             ps = new ObjectOutputStream(cs.getOutputStream());
+            dis = new ObjectInputStream(cs.getInputStream());
             ServerHandler.clientsVector.add(this);
-            ServerHandler serverHandler  = new ServerHandler();
-            Thread thread = new Thread(serverHandler);
+            Thread thread = new Thread(this);
             thread.start();
              System.out.println("after start function ");
         }
@@ -71,7 +71,18 @@ public class ServerHandler implements Runnable{
                         System.out.println(checkSaving);
                         Boolean bool  = new Boolean(true);
                         System.out.println(bool);
-                        ps.writeObject(bool);
+                        ps.writeObject(checkSaving);
+                    }
+                    else if(obj instanceof LoginModel)
+                    {
+                        System.out.println("User is trying to login");
+                        LoginModel player = (LoginModel) obj;
+                        System.out.println(player.getUsername());
+                        System.out.println(player.getPassword());
+                        Boolean checkUserData = new Boolean(DatabaseManager.getInstance().loginUser(player));                        
+                        System.out.println(checkUserData);
+                        ps.writeObject(checkUserData);
+                        //set online status and avaiability
                     }
                 } catch (ClassNotFoundException ex) {
                     Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
