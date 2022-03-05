@@ -40,44 +40,16 @@ public class Server {
                 new ServerHandler(s);
             }
         } catch (IOException ex) {
+            
+            System.out.println("1");
             Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
-        //
-        //serSoc = new ServerSocket(5005);
-
-//            oos = new ObjectOutputStream(waiter.getOutputStream());
-//            ois = new ObjectInputStream(waiter.getInputStream());
-        /*
-            while(true){
-                System.out.println("entered try");
-                waiter = serSoc.accept();
-                new ServerHandler(waiter);
-                
-//                                       
-//                    Object obj = ois.readObject();
-//                    if(obj instanceof SignUpModel)
-//                    {
-//                        System.out.println("User is trying to sign up");
-//                        SignUpModel player = (SignUpModel) obj;
-//                        Boolean checkSaving = new Boolean(DatabaseManager.getInstance().signUPUser(player));                        
-//                        System.out.println(checkSaving);
-//                        Boolean bool  = new Boolean(true);
-//                        System.out.println(bool);
-//                        oos.writeObject(bool);
-//                    }
-//                    else if(obj instanceof LoginModel)
-//                    {
-//                        System.out.println("User is trying to login");
-//                         LoginModel player = (LoginModel) obj;
-//                        System.out.println(player.getUsername());
-//                        System.out.println(player.getPassword());
-////                        String validData = "1";
-////                        oos.writeObject(validData);
-//                    }
-//                    else{
-//                        System.out.println("failed");
-//                    }
-            }
-         */
+        
+        try {
+            serSoc.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 }
