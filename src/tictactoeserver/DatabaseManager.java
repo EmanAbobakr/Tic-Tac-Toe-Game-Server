@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.derby.jdbc.ClientDriver;
+import tictactoelibrary.LoginModel;
 import tictactoelibrary.SignUpModel;
 
 
@@ -58,9 +59,21 @@ public class DatabaseManager {
         }
         return false;
     }
-    public boolean loginUser()
+    public boolean loginUser(LoginModel user)
     {
-        return true;
+         try {
+            PreparedStatement pst = con.prepareStatement("SELECT name, pass FROM UserTable WHERE name = ? AND pass = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            pst.setString(1, user.getUsername());
+            pst.setInt(2, user.getPassword());
+            ResultSet rs = pst.executeQuery();
+            if(rs.next())
+            {
+                return true;
+            }            
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return false;
     }
     
     /*
