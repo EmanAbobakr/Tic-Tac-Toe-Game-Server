@@ -30,8 +30,10 @@ public class TicTacToeServer extends Application {
      */
     public static void main(String[] args) {
 
+
         new Server();
         launch(args);
+
 
     }
 

@@ -5,6 +5,7 @@
  */
 package tictactoeserver;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -41,6 +42,11 @@ public class FXMLDocumentController implements Initializable {
         
         final PieChart pieChartId = new PieChart(pieChartData);
         
-    }    
+    }
+
+    public void hbl(ActionEvent event) throws IOException {
+        DatabaseManager.getInstance().getOnlineUsers();
+
+    }
     
 }
