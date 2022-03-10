@@ -10,6 +10,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.derby.jdbc.ClientDriver;
 import tictactoelibrary.LoginModel;
 import tictactoelibrary.SignUpModel;
@@ -28,6 +31,7 @@ public class DatabaseManager {
         try{
             DriverManager.registerDriver(new ClientDriver());
             con = DriverManager.getConnection("jdbc:derby://localhost:1527/TicTacToe", "root","root");
+            System.out.println("Connection to db done");
         }catch(SQLException ex){
             System.out.print("Connection failed ya java");
         }
@@ -57,6 +61,7 @@ public class DatabaseManager {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+
          try{
             rs.close();
          }
@@ -73,8 +78,10 @@ public class DatabaseManager {
             PreparedStatement pst = con.prepareStatement("SELECT name, pass FROM UserTable WHERE name = ? AND pass = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             pst.setString(1, user.getUsername());
             pst.setInt(2, user.getPassword());
+
              System.out.println(user.getUsername());
              System.out.println(user.getPassword());
+
             rs = pst.executeQuery();
             if(rs.next())
             {
@@ -83,6 +90,7 @@ public class DatabaseManager {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+
          try{
             rs.close();
          }
@@ -93,6 +101,24 @@ public class DatabaseManager {
         return false;
     }
     
+
+    
+    public ArrayList<String> getOnlineUsers() {
+        ArrayList<String> onlineUsers = new ArrayList<String>();
+        
+        try {
+            PreparedStatement pst = con.prepareStatement("SELECT name FROM USERTABLE WHERE isonline = true", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            ResultSet rs = pst.executeQuery();
+            while(rs.next()){
+                onlineUsers.add(rs.getString(1));
+            }
+        } catch (SQLException ex) {
+            System.out.println("ops ops db online users");
+            Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return onlineUsers;
+    }
+
     public static DatabaseManager getInstance() {
         if (datbaseModel == null) {
             datbaseModel = new DatabaseManager();

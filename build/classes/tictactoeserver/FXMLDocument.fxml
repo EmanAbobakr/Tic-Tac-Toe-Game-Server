@@ -19,7 +19,7 @@
    <left>
       <VBox alignment="CENTER" prefHeight="620.0" prefWidth="250.0" spacing="40.0" BorderPane.alignment="CENTER">
          <children>
-            <Button mnemonicParsing="false" prefWidth="100.0" style="-fx-background-color: #05ab23#05ab23;" text="Start" textFill="WHITE">
+            <Button mnemonicParsing="false" onAction="#hbl" prefWidth="100.0" style="-fx-background-color: #05ab23#05ab23;" text="Start" textFill="WHITE">
                <VBox.margin>
                   <Insets />
                </VBox.margin>
