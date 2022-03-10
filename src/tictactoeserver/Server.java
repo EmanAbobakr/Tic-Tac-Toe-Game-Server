@@ -25,11 +25,9 @@ import javax.net.ssl.SSLServerSocket;
 public class Server {
 
     ServerSocket serSoc;
-    Socket waiter;
-//    DataInputStream dis;
-//    DataOutputStream dos;
-    ObjectOutputStream oos;
-    ObjectInputStream ois;
+    //Socket waiter;
+//    ObjectOutputStream oos;
+//    ObjectInputStream ois;
 
     public Server() {
 
