@@ -34,11 +34,11 @@ public class DatabaseManager {
     }
     public boolean signUPUser(SignUpModel user)
     {
-        
+        ResultSet rs = null;
         try {
             PreparedStatement pst = con.prepareStatement("SELECT name FROM UserTable WHERE name = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             pst.setString(1, user.getUsername());
-            ResultSet rs = pst.executeQuery();
+            rs = pst.executeQuery();
             if(rs.next())
             {
                 return false;
@@ -47,8 +47,8 @@ public class DatabaseManager {
             pst.setString(1, user.getUsername());
             pst.setInt(2, user.getPassword());
             pst.setInt(3, 0);
-            pst.setBoolean(4, true);
-            pst.setBoolean(5, true);
+            pst.setBoolean(4, false);
+            pst.setBoolean(5, false);
             int checkSaving = pst.executeUpdate();
             if(checkSaving == 1)
             {
@@ -57,15 +57,25 @@ public class DatabaseManager {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+         try{
+            rs.close();
+         }
+         catch(Exception ex)
+         {
+            ex.printStackTrace();
+         }
         return false;
     }
     public boolean loginUser(LoginModel user)
     {
+        ResultSet rs = null;
          try {
             PreparedStatement pst = con.prepareStatement("SELECT name, pass FROM UserTable WHERE name = ? AND pass = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             pst.setString(1, user.getUsername());
             pst.setInt(2, user.getPassword());
-            ResultSet rs = pst.executeQuery();
+             System.out.println(user.getUsername());
+             System.out.println(user.getPassword());
+            rs = pst.executeQuery();
             if(rs.next())
             {
                 return true;
@@ -73,6 +83,13 @@ public class DatabaseManager {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+         try{
+            rs.close();
+         }
+         catch(Exception ex)
+         {
+            ex.printStackTrace();
+         }
         return false;
     }
     

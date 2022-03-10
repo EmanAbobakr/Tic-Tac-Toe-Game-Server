@@ -5,6 +5,7 @@
  */
 package tictactoeserver;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -29,11 +30,11 @@ public class ServerHandler implements Runnable {
     private Socket sc;
 
     static Vector<ServerHandler> clientsVector = new Vector<ServerHandler>();
-
+    private String username;
     public ServerHandler(Socket cs) {
-        
+
         System.out.println("ServerHandler fun ");
-        sc = cs;       
+        sc = cs;
         try {
             ps = new ObjectOutputStream(sc.getOutputStream());
             dis = new ObjectInputStream(sc.getInputStream());
@@ -44,74 +45,69 @@ public class ServerHandler implements Runnable {
         Thread thread = new Thread(this);
         thread.start();
         System.out.println("after start function ");
-        
+
     }
 
     private ServerHandler() {
     }
 
     @Override
-    public void run() 
-    {
-        int counter = 0;
-         Object obj = null;
+    public void run() {
+        
         System.out.println("run function ");
-        try {
-            obj = dis.readObject();
-        } catch (IOException ex) {
-            Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-         while(true){
-           
-            try {                
-                DatabaseManager.getInstance().connection();               
-                
-                if(obj instanceof SignUpModel && counter == 0)
-                {
-                    System.out.println("User is trying to sign up");
-                    SignUpModel player = (SignUpModel) obj;
-                    Boolean checkSaving = new Boolean(DatabaseManager.getInstance().signUPUser(player));                        
-                    System.out.println(checkSaving);
-                    Boolean bool  = new Boolean(true);
-                    System.out.println(bool);
-                    ps.writeObject(checkSaving);
-                    counter++;
-                }
-                else if(obj instanceof LoginModel  && counter == 0)
-                {
-                    System.out.println("User is trying to login");
-                    LoginModel player = (LoginModel) obj;
-                    System.out.println(player.getUsername());
-                    System.out.println(player.getPassword());
-                    Boolean checkUserData = new Boolean(DatabaseManager.getInstance().loginUser(player));                        
-                    System.out.println(checkUserData);
-                    ps.writeObject(checkUserData);
-                    //set online status and avaiability
-                    counter++;
-                }
+        DatabaseManager.getInstance().connection();
+        //move to constructor
+        while (true) {
+            Object obj = null;
+            try {
+                obj = dis.readObject();
+//                if(obj != null)
+//                {
+                    if (obj instanceof SignUpModel) {
+                        System.out.println("User is trying to sign up");
+                        SignUpModel player = (SignUpModel) obj;
+                        Boolean checkSaving = new Boolean(DatabaseManager.getInstance().signUPUser(player));
+                        System.out.println(checkSaving);
+                        ps.writeObject(checkSaving);
+                    } else if (obj instanceof LoginModel) {
+                        System.out.println("User is trying to login");
+                        LoginModel player = (LoginModel) obj;
+                        System.out.println(player.getUsername());
+                        System.out.println(player.getPassword());
+                        boolean testData = DatabaseManager.getInstance().loginUser(player);
+                        Boolean checkUserData = new Boolean(testData);
+                        System.out.println(checkUserData);
+                        ps.writeObject(checkUserData);
+                        if(checkUserData)
+                        {
+                            username = player.getUsername();
+                        }
+                    }
+//                }
             } 
-//            catch (ClassNotFoundException ex) {
-//                System.out.println("class read object 3");
-//                Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-            catch (IOException ex) {
+            catch (ClassNotFoundException ex) {
+                Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }catch(SocketException ex)
+            {
+                try {
+                    ps.close();
+                    dis.close();
+                } catch (IOException ex1) {
+                    Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex1);
+                }               
                 
-                System.out.println("readobject and writeobject 6");
+            }
+            catch (EOFException ex)
+            {
+                System.out.println("EOF1");
+            }
+            catch (IOException ex) {
+                System.out.println("ioexp");
                 Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
-            try {
-              
-                dis.close();   
-                ps.close();
-                sc.close();
-            } catch (IOException ex) {
-                 System.out.println("closing connection 5");
-                Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
-            }            
         }
         
+
     }
 
 }
