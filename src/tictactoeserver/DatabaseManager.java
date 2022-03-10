@@ -10,6 +10,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.derby.jdbc.ClientDriver;
 import tictactoelibrary.LoginModel;
 import tictactoelibrary.SignUpModel;
@@ -28,17 +31,18 @@ public class DatabaseManager {
         try{
             DriverManager.registerDriver(new ClientDriver());
             con = DriverManager.getConnection("jdbc:derby://localhost:1527/TicTacToe", "root","root");
+            System.out.println("Connection to db done");
         }catch(SQLException ex){
             System.out.print("Connection failed ya java");
         }
     }
     public boolean signUPUser(SignUpModel user)
     {
-        
+        ResultSet rs = null;
         try {
             PreparedStatement pst = con.prepareStatement("SELECT name FROM UserTable WHERE name = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             pst.setString(1, user.getUsername());
-            ResultSet rs = pst.executeQuery();
+            rs = pst.executeQuery();
             if(rs.next())
             {
                 return false;
@@ -47,8 +51,8 @@ public class DatabaseManager {
             pst.setString(1, user.getUsername());
             pst.setInt(2, user.getPassword());
             pst.setInt(3, 0);
-            pst.setBoolean(4, true);
-            pst.setBoolean(5, true);
+            pst.setBoolean(4, false);
+            pst.setBoolean(5, false);
             int checkSaving = pst.executeUpdate();
             if(checkSaving == 1)
             {
@@ -57,15 +61,23 @@ public class DatabaseManager {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+        try{
+           rs.close();
+        }
+        catch(Exception ex)
+        {
+           ex.printStackTrace();
+        }
         return false;
     }
     public boolean loginUser(LoginModel user)
     {
+        ResultSet rs = null;
          try {
             PreparedStatement pst = con.prepareStatement("SELECT name, pass FROM UserTable WHERE name = ? AND pass = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             pst.setString(1, user.getUsername());
             pst.setInt(2, user.getPassword());
-            ResultSet rs = pst.executeQuery();
+            rs = pst.executeQuery();
             if(rs.next())
             {
                 return true;
@@ -73,7 +85,30 @@ public class DatabaseManager {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+        try{
+           rs.close();
+        }
+        catch(Exception ex)
+        {
+           ex.printStackTrace();
+        }
         return false;
+    }
+    
+    public ArrayList<String> getOnlineUsers() {
+        ArrayList<String> onlineUsers = new ArrayList<String>();
+        
+        try {
+            PreparedStatement pst = con.prepareStatement("SELECT name FROM USERTABLE WHERE isonline = true", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            ResultSet rs = pst.executeQuery();
+            while(rs.next()){
+                onlineUsers.add(rs.getString(1));
+            }
+        } catch (SQLException ex) {
+            System.out.println("ops ops db online users");
+            Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return onlineUsers;
     }
     
     /*
