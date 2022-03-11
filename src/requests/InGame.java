@@ -6,15 +6,18 @@
 package requests;
 
 import java.net.Socket;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+import tictactoeserver.ServerHandler;
 
 /**
  *
  * @author MOHAMED ADEL
  */
 public class InGame {
-    public static HashMap<String, Socket> inGame = new HashMap<String , Socket>();
-    public HashMap<String, Socket> publicInGame = new HashMap<String , Socket>();
+    public static Map<String, ServerHandler> inGame = Collections.synchronizedMap(new HashMap<>());
+    public Map<String, ServerHandler> publicInGame = Collections.synchronizedMap(new HashMap<>());
 
     public InGame() {
     }
