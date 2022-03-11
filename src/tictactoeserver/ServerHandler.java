@@ -188,8 +188,8 @@ public class ServerHandler implements Runnable {
     {
         System.out.println("send request to player:");
         //clientsVector to online only clients
-        Socket playerSoc1 = null;
-        Socket playerSoc2 = null;
+        ServerHandler playerSocHer1 = null;
+        ServerHandler playerSocHer2 = null;
         for (ServerHandler sh : clientsVector) {
             if(sh.username.equals(acceptRequest.getPlayer1()) || sh.username.equals(acceptRequest.getPlayer2()))
             {
@@ -199,11 +199,11 @@ public class ServerHandler implements Runnable {
                     OnlineUsersVector.onlineUsersVec.removeElement(sh.username);
                     if(sh.username.equals(acceptRequest.getPlayer1()))
                     {
-                        playerSoc1 = sh.sc;
+                        playerSocHer1 = sh;
                     }
                     else if(sh.username.equals(acceptRequest.getPlayer2()))
                     {
-                        playerSoc2 = sh.sc;
+                        playerSocHer2 = sh;
                     }
                     
                 } catch (IOException ex) {
@@ -211,8 +211,9 @@ public class ServerHandler implements Runnable {
                 }
             }            
         }
-        InGame.inGame.put(acceptRequest.getPlayer1(), playerSoc2);
-        InGame.inGame.put(acceptRequest.getPlayer2(), playerSoc1);
+        InGame.inGame.put(acceptRequest.getPlayer1(), playerSocHer2);
+//        InGame.inGame.get(acceptRequest.getPlayer1()).dis.readObject();
+        InGame.inGame.put(acceptRequest.getPlayer2(), playerSocHer1);
     }
 
 }
