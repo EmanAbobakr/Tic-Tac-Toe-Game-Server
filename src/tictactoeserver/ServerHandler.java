@@ -64,8 +64,6 @@ public class ServerHandler implements Runnable {
             Object obj = null;
             try {
                 obj = dis.readObject();
-//                if(obj != null)
-//                {
                 if (obj instanceof SignUpModel) {
                     System.out.println("User is trying to sign up");
                     SignUpModel player = (SignUpModel) obj;
@@ -108,7 +106,22 @@ public class ServerHandler implements Runnable {
                         sendOnlineUsersToAll();
                     }
                 }
-//                }
+                else if(obj instanceof GameRequest)
+                {
+                    GameRequest gameRequest = (GameRequest) obj;
+                    String recieverPlayer = gameRequest.getRecieverPlayer();
+                    System.out.println("server print player1: " + gameRequest.getStartingPlayer());
+                    System.out.println("server print player1: " + gameRequest.getRecieverPlayer());
+                    sendRequestToPlayer(recieverPlayer,gameRequest);
+                }
+                
+                else if(obj instanceof AcceptancePlayingRequest)
+                {
+                    AcceptancePlayingRequest accept = (AcceptancePlayingRequest) obj;
+                    sendToGame(accept);
+                    sendOnlineUsersToAll();
+                    
+                }
             } catch (ClassNotFoundException ex) {
                 Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
             } catch (SocketException ex) {
@@ -152,6 +165,54 @@ public class ServerHandler implements Runnable {
             }
         }
         System.out.println("I send online users to all users");
+    }
+    
+    void sendRequestToPlayer(String player,GameRequest req)
+    {
+        System.out.println("send request to player:");
+        //clientsVector to online only clients
+        for (ServerHandler sh : clientsVector) {
+            if(sh.username.equals(player))
+            {
+                System.out.println(sh.username);
+                try {
+                    sh.ps.writeObject(req);
+                } catch (IOException ex) {
+                    Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }            
+        }        
+    }
+    
+    void sendToGame(AcceptancePlayingRequest acceptRequest)
+    {
+        System.out.println("send request to player:");
+        //clientsVector to online only clients
+        Socket playerSoc1 = null;
+        Socket playerSoc2 = null;
+        for (ServerHandler sh : clientsVector) {
+            if(sh.username.equals(acceptRequest.getPlayer1()) || sh.username.equals(acceptRequest.getPlayer2()))
+            {
+                System.out.println(sh.username);
+                try {
+                    sh.ps.writeObject(acceptRequest);
+                    OnlineUsersVector.onlineUsersVec.removeElement(sh.username);
+                    if(sh.username.equals(acceptRequest.getPlayer1()))
+                    {
+                        playerSoc1 = sh.sc;
+                    }
+                    else if(sh.username.equals(acceptRequest.getPlayer2()))
+                    {
+                        playerSoc2 = sh.sc;
+                    }
+                    
+                } catch (IOException ex) {
+                    Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }            
+        }
+        InGame.inGame.put(acceptRequest.getPlayer1(), playerSoc2);
+        InGame.inGame.put(acceptRequest.getPlayer2(), playerSoc1);
     }
 
 }
