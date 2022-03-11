@@ -4,6 +4,8 @@
  * and open the template in the editor.
  */
 package tictactoeserver;
+
+import requests.OnlineUsersVector;
 import java.beans.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,35 +18,34 @@ import java.util.logging.Logger;
 import org.apache.derby.jdbc.ClientDriver;
 import tictactoelibrary.LoginModel;
 import tictactoelibrary.SignUpModel;
-
+import requests.*;
 
 /**
  *
  * @author EmanAbobakr
  */
 public class DatabaseManager {
-    
+
     Connection con;
     private static DatabaseManager datbaseModel;
-            
-    public void connection(){
-        try{
+
+    public void connection() {
+        try {
             DriverManager.registerDriver(new ClientDriver());
-            con = DriverManager.getConnection("jdbc:derby://localhost:1527/TicTacToe", "root","root");
+            con = DriverManager.getConnection("jdbc:derby://localhost:1527/TicTacToe", "root", "root");
             System.out.println("Connection to db done");
-        }catch(SQLException ex){
+        } catch (SQLException ex) {
             System.out.print("Connection failed ya java");
         }
     }
-    public boolean signUPUser(SignUpModel user)
-    {
+
+    public boolean signUPUser(SignUpModel user) {
         ResultSet rs = null;
         try {
             PreparedStatement pst = con.prepareStatement("SELECT name FROM UserTable WHERE name = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             pst.setString(1, user.getUsername());
             rs = pst.executeQuery();
-            if(rs.next())
-            {
+            if (rs.next()) {
                 return false;
             }
             pst = con.prepareStatement("INSERT INTO userTable ( name, pass, totalscore, isOnline, isAvailable) " + "VALUES ( ?, ?, ?, ?, ?)");
@@ -54,63 +55,59 @@ public class DatabaseManager {
             pst.setBoolean(4, false);
             pst.setBoolean(5, false);
             int checkSaving = pst.executeUpdate();
-            if(checkSaving == 1)
-            {
+            if (checkSaving == 1) {
                 return true;
-            }            
+            }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
 
-         try{
+        try {
             rs.close();
-         }
-         catch(Exception ex)
-         {
+        } catch (Exception ex) {
             ex.printStackTrace();
-         }
+        }
         return false;
     }
-    public boolean loginUser(LoginModel user)
-    {
+
+    public boolean loginUser(LoginModel user) {
         ResultSet rs = null;
-         try {
-            PreparedStatement pst = con.prepareStatement("SELECT name, pass FROM UserTable WHERE name = ? AND pass = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        PreparedStatement pst = null;
+        try {
+            pst = con.prepareStatement("SELECT name, pass FROM UserTable WHERE name = ? AND pass = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             pst.setString(1, user.getUsername());
             pst.setInt(2, user.getPassword());
 
-             System.out.println(user.getUsername());
-             System.out.println(user.getPassword());
+            System.out.println(user.getUsername());
+            System.out.println(user.getPassword());
 
             rs = pst.executeQuery();
-            if(rs.next())
-            {
+            if (rs.next()) {
+                updateOnline(user.getUsername());
                 return true;
-            }            
+            }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
 
-         try{
+        try {
             rs.close();
-         }
-         catch(Exception ex)
-         {
+            //pst.close();
+        } catch (Exception ex) {
             ex.printStackTrace();
-         }
+        }
         return false;
     }
-    
 
-    
     public ArrayList<String> getOnlineUsers() {
         ArrayList<String> onlineUsers = new ArrayList<String>();
-        
+
         try {
             PreparedStatement pst = con.prepareStatement("SELECT name FROM USERTABLE WHERE isonline = true", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             ResultSet rs = pst.executeQuery();
-            while(rs.next()){
+            while (rs.next()) {
                 onlineUsers.add(rs.getString(1));
+                System.out.println(rs.getString(1));
             }
         } catch (SQLException ex) {
             System.out.println("ops ops db online users");
@@ -123,8 +120,29 @@ public class DatabaseManager {
         if (datbaseModel == null) {
             datbaseModel = new DatabaseManager();
         }
-        
+
         return datbaseModel;
+    }
+
+    public void updateOnline(String username) {
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        try {
+            pst = con.prepareStatement("update UserTable set isonline = ? WHERE name = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            //PreparedStatement st = db.con.prepareStatement("UPDATE item SET Name = ?, Size = ?, Price = ?, WHERE ItemCode = ?");
+            //OnlineUsersVector.getInstance().onlineUsersVec.add(username);
+            OnlineUsersVector.onlineUsersVec.add(username);
+            pst.setBoolean(1, true);
+            pst.setString(2, username);
+            System.out.println(username);
+            pst.executeUpdate();
+            pst.close();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        
+
     }
 
 }
