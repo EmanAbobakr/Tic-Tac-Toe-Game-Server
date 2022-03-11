@@ -5,17 +5,22 @@
  */
 package requests;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  *
  * @author EmanAbobakr
  */
-public class OnlineUsers {
+public class OnlineUsers implements Serializable{
     private ArrayList<String> onlineUsers;
 
     public OnlineUsers(ArrayList<String> onlineUsers) {
         this.onlineUsers = onlineUsers;
+    }
+    
+    public OnlineUsers() {
+        
     }
 
     public ArrayList<String> getOnlineUsers() {
