@@ -66,25 +66,40 @@ public class ServerHandler implements Runnable {
                 obj = dis.readObject();
 //                if(obj != null)
 //                {
-                    if (obj instanceof SignUpModel) {
-           System.out.println("User is trying to sign up");
-                        SignUpModel player = (SignUpModel) obj;
-                        Boolean checkSaving = new Boolean(DatabaseManager.getInstance().signUPUser(player));
-                        System.out.println(checkSaving);
-                        ps.writeObject(checkSaving);
-                    } else if (obj instanceof LoginModel) {
-                        System.out.println("User is trying to login");
-                        LoginModel player = (LoginModel) obj;
-                        System.out.println(player.getUsername());
-                        System.out.println(player.getPassword());
-                        boolean testData = DatabaseManager.getInstance().loginUser(player);
-                        Boolean checkUserData = new Boolean(testData);
-                        System.out.println(checkUserData);
-                        ps.writeObject(checkUserData);
+                if (obj instanceof SignUpModel) {
+                    System.out.println("User is trying to sign up");
+                    SignUpModel player = (SignUpModel) obj;
+                    Boolean checkSaving = new Boolean(DatabaseManager.getInstance().signUPUser(player));
+                    System.out.println(checkSaving);
+                    //Friday
+                    if(checkSaving){
+                        String str = new String("signup");
+                        ps.writeObject(str);
+                    }
+                    else{
+                        String str = new String("notSignup");
+                        ps.writeObject(str);
+                    }
+                    /////ps.writeObject(checkSaving);
+                } else if (obj instanceof LoginModel) {
+                    System.out.println("User is trying to login");
+                    LoginModel player = (LoginModel) obj;
+                    System.out.println(player.getUsername());
+                    System.out.println(player.getPassword());
+                    boolean testData = DatabaseManager.getInstance().loginUser(player);
+                    Boolean checkUserData = new Boolean(testData);
+                    System.out.println(checkUserData);
+                    if(checkUserData){
+                        String str = new String("login");
+                        ps.writeObject(str);
+                    }else{
+                        String str = new String("notLogin");
+                        ps.writeObject(str);
+                    }
+                    //ps.writeObject(checkUserData);
 
-                        if(checkUserData)
-                        {
-                            username = player.getUsername();
+                    if (checkUserData) {
+                        username = player.getUsername();
                     }
                 } else if (obj instanceof String) {
                     String s = (String) obj;
