@@ -27,7 +27,7 @@ import interfaces.PieChartInterface;
  *
  * @author EmanAbobakr
  */
-public class FXMLDocumentController implements Initializable,PieChartInterface {
+public class FXMLDocumentController implements Initializable, PieChartInterface {
 
     @FXML
     private PieChart pieChartId;
@@ -57,7 +57,7 @@ public class FXMLDocumentController implements Initializable,PieChartInterface {
         DatabaseManager.getInstance().piechartRef = this;
         pieChart();
         pieChartId.setVisible(true);
-        
+
         server = new Server();
         startId.setDisable(true);
         stopId.setDisable(false);
@@ -69,6 +69,8 @@ public class FXMLDocumentController implements Initializable,PieChartInterface {
             ServerHandler.closeSockets();
             server.serSoc.close();
             pieChartId.setVisible(false);
+            pieChartId.getData().remove(0);
+            pieChartId.getData().remove(0);
             DatabaseManager.getInstance().closeConnection();
             startId.setDisable(false);
             stopId.setDisable(true);
@@ -82,21 +84,19 @@ public class FXMLDocumentController implements Initializable,PieChartInterface {
 
         pieChartId.getData().remove(0);
         pieChartId.getData().remove(0);
-        
+
         onlineUsers = DatabaseManager.getInstance().numberOfOnlineUsers();
         offlineUser = DatabaseManager.getInstance().numberOfAllUsers() - onlineUsers;
-        
+
         pieChartId.getData().add(new PieChart.Data("Online players", onlineUsers));
         pieChartId.getData().add(new PieChart.Data("offline players", offlineUser));
 
-
     }
-
 
     public void pieChart() {
         onlineUsers = DatabaseManager.getInstance().numberOfOnlineUsers();
         offlineUser = DatabaseManager.getInstance().numberOfAllUsers() - onlineUsers;
-        
+
         pieChartId.getData().add(new PieChart.Data("Online players", onlineUsers));
         pieChartId.getData().add(new PieChart.Data("offline players", offlineUser));
 

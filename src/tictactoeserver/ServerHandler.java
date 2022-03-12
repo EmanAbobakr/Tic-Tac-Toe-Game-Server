@@ -131,6 +131,16 @@ public class ServerHandler implements Runnable {
                     sendMoveToPlayer(move);
                     
                 }
+                
+                else if(obj instanceof GameResult)
+                {
+                    GameResult result = (GameResult) obj;
+//                    System.out.println(result.getPlayer1());
+//                    System.out.println(result.getPlayer2());
+//                    System.out.println(result.getWinner());
+                    DatabaseManager.getInstance().updatePlayersScore(result);
+                    
+                }
             } catch (ClassNotFoundException ex) {
                 Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
             } catch (SocketException ex) {
