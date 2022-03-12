@@ -14,32 +14,41 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javax.net.ssl.SSLServerSocket;
 
 /**
  *
  * @author MOHAMED ADEL
  */
-public class Server {
+public class Server implements Runnable{
 
     ServerSocket serSoc;
-    //Socket waiter;
-//    ObjectOutputStream oos;
-//    ObjectInputStream ois;
 
     public Server() {
-
+        System.out.println("We are in new server");
+        Thread thread = new Thread(this);
+        thread.start();       
+    }
+    
+    @Override
+    public void run() {
         try {
             serSoc = new ServerSocket(5005);
             while (true) {
                 Socket s = serSoc.accept();
                 new ServerHandler(s);
             }
-        } catch (IOException ex) {
+        }catch(SocketException e){
+            System.out.println("We handled it");
+            System.out.println("socket exception");    
+        }
+        catch (IOException ex) {
             
-            System.out.println("1");
+            System.out.println("io exception");
             Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
         
@@ -48,6 +57,5 @@ public class Server {
         } catch (IOException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
 }
