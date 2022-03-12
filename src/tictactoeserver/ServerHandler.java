@@ -122,6 +122,13 @@ public class ServerHandler implements Runnable {
                     sendOnlineUsersToAll();
                     
                 }
+                
+                else if(obj instanceof GameMove)
+                {
+                    GameMove move = (GameMove) obj;
+                    sendMoveToPlayer(move);
+                    
+                }
             } catch (ClassNotFoundException ex) {
                 Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
             } catch (SocketException ex) {
@@ -215,5 +222,15 @@ public class ServerHandler implements Runnable {
 //        InGame.inGame.get(acceptRequest.getPlayer1()).dis.readObject();
         InGame.inGame.put(acceptRequest.getPlayer2(), playerSocHer1);
     }
-
+    void sendMoveToPlayer(GameMove move)
+    {
+        System.out.println("send Move to player:");
+        try
+        {
+            InGame.inGame.get(move.getSenderPlayer()).ps.writeObject(move);
+        }catch(IOException ex)
+        {
+            ex.printStackTrace();
+        }
+    }
 }
