@@ -141,19 +141,19 @@ public class DatabaseManager {
             System.out.println(username);
             pst.executeUpdate();
             Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            piechartRef.updatePieChart();
-                        }
-                    });
-            
+                @Override
+                public void run() {
+                    piechartRef.updatePieChart();
+                }
+            });
+
             pst.close();
 
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
-    
+
     public void updateOffline(String username) {
         ResultSet rs = null;
         PreparedStatement pst = null;
@@ -166,12 +166,12 @@ public class DatabaseManager {
             System.out.println(username);
             pst.executeUpdate();
             Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            piechartRef.updatePieChart();
-                        }
-                    });
-            
+                @Override
+                public void run() {
+                    piechartRef.updatePieChart();
+                }
+            });
+
             pst.close();
 
         } catch (SQLException ex) {
@@ -247,7 +247,7 @@ public class DatabaseManager {
         }
         return 0;
     }
-    
+
     public HashMap<String, Integer> getPlayersWithScores() {
         HashMap<String, Integer> scores = new HashMap<String, Integer>();
         ResultSet rs = null;
@@ -255,14 +255,21 @@ public class DatabaseManager {
         try {
             pst = con.prepareStatement("SELECT name,totalscore FROM UserTable", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
             rs = pst.executeQuery();
-            
-            while(rs.next()){              
-                scores.put(rs.getString(1),Integer.parseInt(rs.getString(2)));
-                
+
+            while (rs.next()) {
+                scores.put(rs.getString(1), Integer.parseInt(rs.getString(2)));
+
             }
             System.out.println(scores);
-    public void updatePlayersScore(GameResult gameResult)
-    {
+            pst.close();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return scores;
+    }
+
+    public void updatePlayersScore(GameResult gameResult) {
         ResultSet rs = null;
         PreparedStatement pst = null;
         try {
@@ -271,23 +278,22 @@ public class DatabaseManager {
             System.out.println("database update fun win: " + gameResult.getWinner());
             System.out.println("database update fun player 1: " + gameResult.getPlayer1());
             System.out.println("database update fun player 2: " + gameResult.getPlayer2());
-            pst.executeUpdate();            
+            pst.executeUpdate();
             pst.close();
 
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        return scores;
+
     }
-    
-    
-    }
-    
+
     public void closeConnection() {
         try {
             con.close();
+
         } catch (SQLException ex) {
-            Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DatabaseManager.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
