@@ -61,6 +61,9 @@ public class FXMLDocumentController implements Initializable,PieChartInterface {
         server = new Server();
         startId.setDisable(true);
         stopId.setDisable(false);
+        
+        System.out.println("I will print scores");
+        DatabaseManager.getInstance().getPlayersWithScores();
     }
 
     @FXML

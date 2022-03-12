@@ -20,6 +20,7 @@ import tictactoelibrary.LoginModel;
 import tictactoelibrary.SignUpModel;
 import requests.*;
 import interfaces.PieChartInterface;
+import java.util.HashMap;
 import javafx.application.Platform;
 
 /**
@@ -151,7 +152,31 @@ public class DatabaseManager {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+    
+    public void updateOffline(String username) {
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        try {
+            pst = con.prepareStatement("update UserTable set isonline = ? WHERE name = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            OnlineUsersVector.onlineUsersVec.add(username);
+            OnlineUsersVector.onlineUsersVec.remove(username);
+            pst.setBoolean(1, false);
+            pst.setString(2, username);
+            System.out.println(username);
+            pst.executeUpdate();
+            Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            piechartRef.updatePieChart();
+                        }
+                    });
+            
+            pst.close();
 
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
     }
 
     public int numberOfOnlineUsers() {
@@ -222,6 +247,28 @@ public class DatabaseManager {
         }
         return 0;
     }
+    
+    public HashMap<String, Integer> getPlayersWithScores() {
+        HashMap<String, Integer> scores = new HashMap<String, Integer>();
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        try {
+            pst = con.prepareStatement("SELECT name,totalscore FROM UserTable", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            rs = pst.executeQuery();
+            
+            while(rs.next()){              
+                scores.put(rs.getString(1),Integer.parseInt(rs.getString(2)));
+                
+            }
+            System.out.println(scores);
+            pst.close();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return scores;
+    }
+    
     
     public void closeConnection() {
         try {
