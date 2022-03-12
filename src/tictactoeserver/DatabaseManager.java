@@ -261,6 +261,17 @@ public class DatabaseManager {
                 
             }
             System.out.println(scores);
+    public void updatePlayersScore(GameResult gameResult)
+    {
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        try {
+            pst = con.prepareStatement("UPDATE UserTable SET totalscore = totalscore + 10 WHERE name = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            pst.setString(1, gameResult.getWinner());
+            System.out.println("database update fun win: " + gameResult.getWinner());
+            System.out.println("database update fun player 1: " + gameResult.getPlayer1());
+            System.out.println("database update fun player 2: " + gameResult.getPlayer2());
+            pst.executeUpdate();            
             pst.close();
 
         } catch (SQLException ex) {
@@ -269,6 +280,8 @@ public class DatabaseManager {
         return scores;
     }
     
+    
+    }
     
     public void closeConnection() {
         try {
