@@ -58,7 +58,9 @@ public class ServerHandler implements Runnable {
 
         System.out.println("run function ");
 
-        DatabaseManager.getInstance().connection();
+        //we deleted it because we connect to DB when start the server
+        //DatabaseManager.getInstance().connection();
+        
         //move to constructor
         while (true) {
             Object obj = null;
@@ -213,6 +215,20 @@ public class ServerHandler implements Runnable {
         }
         InGame.inGame.put(acceptRequest.getPlayer1(), playerSoc2);
         InGame.inGame.put(acceptRequest.getPlayer2(), playerSoc1);
+    }
+    
+    public static void closeSockets(){
+        for (ServerHandler sh : clientsVector) {
+            try {
+                sh.dis.close();
+                sh.ps.close();
+                sh.sc.close();
+            } catch (IOException ex) {
+                System.out.println("Closing all sockets");
+                Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        }
     }
 
 }

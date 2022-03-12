@@ -19,6 +19,8 @@ import org.apache.derby.jdbc.ClientDriver;
 import tictactoelibrary.LoginModel;
 import tictactoelibrary.SignUpModel;
 import requests.*;
+import interfaces.PieChartInterface;
+import javafx.application.Platform;
 
 /**
  *
@@ -28,6 +30,7 @@ public class DatabaseManager {
 
     Connection con;
     private static DatabaseManager datbaseModel;
+    PieChartInterface piechartRef;
 
     public void connection() {
         try {
@@ -136,13 +139,96 @@ public class DatabaseManager {
             pst.setString(2, username);
             System.out.println(username);
             pst.executeUpdate();
+            Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            piechartRef.updatePieChart();
+                        }
+                    });
+            
             pst.close();
 
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        
 
+    }
+
+    public int numberOfOnlineUsers() {
+        ResultSet rs = null;
+        try {
+            PreparedStatement pst = con.prepareStatement("SELECT COUNT(name) FROM UserTable WHERE isOnline = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            pst.setBoolean(1, true);
+            rs = pst.executeQuery();
+//            while (rs.next()) {
+//                onlinePlayersCount++;
+//            }
+            rs.next();
+            System.out.println(Integer.parseInt(rs.getString(1)));
+            return Integer.parseInt(rs.getString(1));
+            //return 10;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        try {
+            rs.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+
+//    public int numberOfAvailableUsers() {
+//        ResultSet rs = null;
+//        try {
+//            PreparedStatement pst = con.prepareStatement("SELECT COUNT(name) FROM UserTable WHERE isAvailable = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+//            pst.setBoolean(5, true);
+//            rs = pst.executeQuery();
+//            while (rs.next()) {
+//                availablePlayersCount++;
+//            }
+//
+//        } catch (SQLException ex) {
+//            ex.printStackTrace();
+//        }
+//
+//        try {
+//            rs.close();
+//        } catch (SQLException ex) {
+//            Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return availablePlayersCount;
+//    }
+    public int numberOfAllUsers() {
+        ResultSet rs = null;
+        try {
+            PreparedStatement pst = con.prepareStatement("SELECT COUNT(name) FROM UserTable", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+//pst.setBoolean(5, true);
+            rs = pst.executeQuery();
+//            while (rs.next()) {
+//                allPlayersCount++;
+//            }
+            rs.next();
+            return Integer.parseInt(rs.getString(1));
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        try {
+            rs.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+    
+    public void closeConnection() {
+        try {
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }
