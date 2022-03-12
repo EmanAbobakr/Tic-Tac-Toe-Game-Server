@@ -248,8 +248,8 @@ public class DatabaseManager {
         return 0;
     }
 
-    public HashMap<String, Integer> getPlayersWithScores() {
-        HashMap<String, Integer> scores = new HashMap<String, Integer>();
+    public HashMap<String, String> getPlayersWithScores() {
+        HashMap<String, String> scores = new HashMap<String, String>();
         ResultSet rs = null;
         PreparedStatement pst = null;
         try {
@@ -257,7 +257,7 @@ public class DatabaseManager {
             rs = pst.executeQuery();
 
             while (rs.next()) {
-                scores.put(rs.getString(1), Integer.parseInt(rs.getString(2)));
+                scores.put(rs.getString(1), rs.getString(2));
 
             }
             System.out.println(scores);

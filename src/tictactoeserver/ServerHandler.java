@@ -107,6 +107,10 @@ public class ServerHandler implements Runnable {
                         System.out.println("A user asked to get online users");
                         sendOnlineUsersToAll();
                     }
+                    else if (s.equals("scoreTable")) {
+                        System.out.println("A user asked to get score table");
+                        sendScoreTableToAll();
+                    }
                 }
                 else if(obj instanceof GameRequest)
                 {
@@ -184,6 +188,19 @@ public class ServerHandler implements Runnable {
             }
         }
         System.out.println("I send online users to all users");
+    }
+    
+    void sendScoreTableToAll() {
+        ScoreTable st = new ScoreTable();
+        st.scores = DatabaseManager.getInstance().getPlayersWithScores();
+        for (ServerHandler sh : clientsVector) {
+            try {             
+                sh.ps.writeObject(st);
+            } catch (IOException ex) {
+                Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        System.out.println("I send score table to all users");
     }
     
     void sendRequestToPlayer(String player,GameRequest req)
