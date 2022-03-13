@@ -60,7 +60,6 @@ public class ServerHandler implements Runnable {
 
         //we deleted it because we connect to DB when start the server
         //DatabaseManager.getInstance().connection();
-        
         //move to constructor
         while (true) {
             Object obj = null;
@@ -72,11 +71,10 @@ public class ServerHandler implements Runnable {
                     Boolean checkSaving = new Boolean(DatabaseManager.getInstance().signUPUser(player));
                     System.out.println(checkSaving);
                     //Friday
-                    if(checkSaving){
+                    if (checkSaving) {
                         String str = new String("signup");
                         ps.writeObject(str);
-                    }
-                    else{
+                    } else {
                         String str = new String("notSignup");
                         ps.writeObject(str);
                     }
@@ -86,13 +84,31 @@ public class ServerHandler implements Runnable {
                     LoginModel player = (LoginModel) obj;
                     System.out.println(player.getUsername());
                     System.out.println(player.getPassword());
+                    
                     boolean testData = DatabaseManager.getInstance().loginUser(player);
                     Boolean checkUserData = new Boolean(testData);
+
                     System.out.println(checkUserData);
-                    if(checkUserData){
-                        String str = new String("login");
-                        ps.writeObject(str);
-                    }else{
+                    System.out.println("name " + "is trying to login");
+//                    System.out.println("checking isonline from serverhandler" + DatabaseManager.getInstance().isOnline(username));
+                    if (checkUserData) {
+                        if (DatabaseManager.getInstance().isOnline(player.getUsername())) {
+                            
+                            String str = new String("alreadyLogin");
+                            ps.writeObject(str);
+                            ps.close();
+                            dis.close();
+                            sc.close();
+                            ServerHandler.clientsVector.remove(this);
+                            
+                        } else {
+                            DatabaseManager.getInstance().updateOnline(player.getUsername());
+                            //username = player.getUsername();
+                            String str = new String("login");
+                            ps.writeObject(str);
+                        }
+
+                    } else {
                         String str = new String("notLogin");
                         ps.writeObject(str);
                     }
@@ -106,44 +122,40 @@ public class ServerHandler implements Runnable {
                     if (s.equals("getOnlineUser")) {
                         System.out.println("A user asked to get online users");
                         sendOnlineUsersToAll();
-                    }
-                    else if (s.equals("scoreTable")) {
+                    } else if (s.equals("scoreTable")) {
                         System.out.println("A user asked to get score table");
                         sendScoreTableToAll();
+                    } else if (s.equals("logout")) {
+                        System.out.println(username + "asked to log out");
+                        dis.close();
+                        ps.close();
+                        sc.close();
+                        ServerHandler.clientsVector.remove(this);
+                        DatabaseManager.getInstance().updateOffline(username);
+                        sendOnlineUsersToAll();
                     }
-                }
-                else if(obj instanceof GameRequest)
-                {
+                } else if (obj instanceof GameRequest) {
                     GameRequest gameRequest = (GameRequest) obj;
                     String recieverPlayer = gameRequest.getRecieverPlayer();
                     System.out.println("server print player1: " + gameRequest.getStartingPlayer());
                     System.out.println("server print player1: " + gameRequest.getRecieverPlayer());
-                    sendRequestToPlayer(recieverPlayer,gameRequest);
-                }
-                
-                else if(obj instanceof AcceptancePlayingRequest)
-                {
+                    sendRequestToPlayer(recieverPlayer, gameRequest);
+                } else if (obj instanceof AcceptancePlayingRequest) {
                     AcceptancePlayingRequest accept = (AcceptancePlayingRequest) obj;
                     sendToGame(accept);
                     sendOnlineUsersToAll();
-                    
-                }
-                
-                else if(obj instanceof GameMove)
-                {
+
+                } else if (obj instanceof GameMove) {
                     GameMove move = (GameMove) obj;
                     sendMoveToPlayer(move);
-                    
-                }
-                
-                else if(obj instanceof GameResult)
-                {
+
+                } else if (obj instanceof GameResult) {
                     GameResult result = (GameResult) obj;
 //                    System.out.println(result.getPlayer1());
 //                    System.out.println(result.getPlayer2());
 //                    System.out.println(result.getWinner());
                     DatabaseManager.getInstance().updatePlayersScore(result);
-                    
+
                 }
             } catch (ClassNotFoundException ex) {
                 Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
@@ -189,12 +201,12 @@ public class ServerHandler implements Runnable {
         }
         System.out.println("I send online users to all users");
     }
-    
+
     void sendScoreTableToAll() {
         ScoreTable st = new ScoreTable();
         st.scores = DatabaseManager.getInstance().getPlayersWithScores();
         for (ServerHandler sh : clientsVector) {
-            try {             
+            try {
                 sh.ps.writeObject(st);
             } catch (IOException ex) {
                 Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
@@ -202,57 +214,50 @@ public class ServerHandler implements Runnable {
         }
         System.out.println("I send score table to all users");
     }
-    
-    void sendRequestToPlayer(String player,GameRequest req)
-    {
+
+    void sendRequestToPlayer(String player, GameRequest req) {
         System.out.println("send request to player:");
         //clientsVector to online only clients
         for (ServerHandler sh : clientsVector) {
-            if(sh.username.equals(player))
-            {
+            if (sh.username.equals(player)) {
                 System.out.println(sh.username);
                 try {
                     sh.ps.writeObject(req);
                 } catch (IOException ex) {
                     Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }            
-        }        
+            }
+        }
     }
-    
-    void sendToGame(AcceptancePlayingRequest acceptRequest)
-    {
+
+    void sendToGame(AcceptancePlayingRequest acceptRequest) {
         System.out.println("send request to player:");
         //clientsVector to online only clients
         ServerHandler playerSocHer1 = null;
         ServerHandler playerSocHer2 = null;
         for (ServerHandler sh : clientsVector) {
-            if(sh.username.equals(acceptRequest.getPlayer1()) || sh.username.equals(acceptRequest.getPlayer2()))
-            {
+            if (sh.username.equals(acceptRequest.getPlayer1()) || sh.username.equals(acceptRequest.getPlayer2())) {
                 System.out.println(sh.username);
                 try {
                     sh.ps.writeObject(acceptRequest);
                     OnlineUsersVector.onlineUsersVec.removeElement(sh.username);
-                    if(sh.username.equals(acceptRequest.getPlayer1()))
-                    {
+                    if (sh.username.equals(acceptRequest.getPlayer1())) {
                         playerSocHer1 = sh;
-                    }
-                    else if(sh.username.equals(acceptRequest.getPlayer2()))
-                    {
+                    } else if (sh.username.equals(acceptRequest.getPlayer2())) {
                         playerSocHer2 = sh;
                     }
-                    
+
                 } catch (IOException ex) {
                     Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }            
+            }
         }
         InGame.inGame.put(acceptRequest.getPlayer1(), playerSocHer2);
 //        InGame.inGame.get(acceptRequest.getPlayer1()).dis.readObject();
         InGame.inGame.put(acceptRequest.getPlayer2(), playerSocHer1);
     }
-    
-    public static void closeSockets(){
+
+    public static void closeSockets() {
         for (ServerHandler sh : clientsVector) {
             try {
                 sh.dis.close();
@@ -262,19 +267,17 @@ public class ServerHandler implements Runnable {
                 System.out.println("Closing all sockets");
                 Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
         }
     }
 
-    void sendMoveToPlayer(GameMove move)
-    {
+    void sendMoveToPlayer(GameMove move) {
         System.out.println("send Move to player:");
-        try
-        {
+        try {
             InGame.inGame.get(move.getSenderPlayer()).ps.writeObject(move);
-        }catch(IOException ex)
-        {
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
+
 }

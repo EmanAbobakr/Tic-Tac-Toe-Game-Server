@@ -87,7 +87,7 @@ public class DatabaseManager {
 
             rs = pst.executeQuery();
             if (rs.next()) {
-                updateOnline(user.getUsername());
+                //updateOnline(user.getUsername());
                 return true;
             }
         } catch (SQLException ex) {
@@ -159,7 +159,6 @@ public class DatabaseManager {
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement("update UserTable set isonline = ? WHERE name = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            OnlineUsersVector.onlineUsersVec.add(username);
             OnlineUsersVector.onlineUsersVec.remove(username);
             pst.setBoolean(1, false);
             pst.setString(2, username);
@@ -203,36 +202,13 @@ public class DatabaseManager {
         return 0;
     }
 
-//    public int numberOfAvailableUsers() {
-//        ResultSet rs = null;
-//        try {
-//            PreparedStatement pst = con.prepareStatement("SELECT COUNT(name) FROM UserTable WHERE isAvailable = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-//            pst.setBoolean(5, true);
-//            rs = pst.executeQuery();
-//            while (rs.next()) {
-//                availablePlayersCount++;
-//            }
-//
-//        } catch (SQLException ex) {
-//            ex.printStackTrace();
-//        }
-//
-//        try {
-//            rs.close();
-//        } catch (SQLException ex) {
-//            Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return availablePlayersCount;
-//    }
     public int numberOfAllUsers() {
         ResultSet rs = null;
         try {
             PreparedStatement pst = con.prepareStatement("SELECT COUNT(name) FROM UserTable", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-//pst.setBoolean(5, true);
+
             rs = pst.executeQuery();
-//            while (rs.next()) {
-//                allPlayersCount++;
-//            }
+
             rs.next();
             return Integer.parseInt(rs.getString(1));
 
@@ -285,6 +261,35 @@ public class DatabaseManager {
             ex.printStackTrace();
         }
 
+    }
+
+    public boolean isOnline(String username) {
+        System.out.println("user name to check if online " + username);
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        try {
+            pst = con.prepareStatement("SELECT isonline FROM UserTable WHERE name = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            pst.setString(1, username);
+
+            rs = pst.executeQuery();
+
+//            if (rs.next()) {
+//                System.out.println(rs.getString(1).getClass());
+//                System.out.println("print isonline bool" + rs.getString(1));
+//                return Boolean.parseBoolean(rs.getString(1));
+//            } else {
+//                System.out.println("rs.next false");
+//            }
+            rs.next();
+            
+//            System.out.println("print isonline bool" + rs.getString(1));
+            return Boolean.parseBoolean(rs.getString(1));
+
+            //return rs.getString(1);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return false;
     }
 
     public void closeConnection() {
