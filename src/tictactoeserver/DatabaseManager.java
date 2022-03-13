@@ -203,27 +203,6 @@ public class DatabaseManager {
         return 0;
     }
 
-//    public int numberOfAvailableUsers() {
-//        ResultSet rs = null;
-//        try {
-//            PreparedStatement pst = con.prepareStatement("SELECT COUNT(name) FROM UserTable WHERE isAvailable = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-//            pst.setBoolean(5, true);
-//            rs = pst.executeQuery();
-//            while (rs.next()) {
-//                availablePlayersCount++;
-//            }
-//
-//        } catch (SQLException ex) {
-//            ex.printStackTrace();
-//        }
-//
-//        try {
-//            rs.close();
-//        } catch (SQLException ex) {
-//            Logger.getLogger(DatabaseManager.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return availablePlayersCount;
-//    }
     public int numberOfAllUsers() {
         ResultSet rs = null;
         try {
@@ -269,15 +248,12 @@ public class DatabaseManager {
         return scores;
     }
 
-    public void updatePlayersScore(GameResult gameResult) {
+    public void updatePlayersScore(String name) {
         ResultSet rs = null;
         PreparedStatement pst = null;
         try {
             pst = con.prepareStatement("UPDATE UserTable SET totalscore = totalscore + 10 WHERE name = ?", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            pst.setString(1, gameResult.getWinner());
-            System.out.println("database update fun win: " + gameResult.getWinner());
-            System.out.println("database update fun player 1: " + gameResult.getPlayer1());
-            System.out.println("database update fun player 2: " + gameResult.getPlayer2());
+            pst.setString(1, name);
             pst.executeUpdate();
             pst.close();
 
