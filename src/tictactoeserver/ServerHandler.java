@@ -154,8 +154,17 @@ public class ServerHandler implements Runnable {
 //                    System.out.println(result.getPlayer1());
 //                    System.out.println(result.getPlayer2());
 //                    System.out.println(result.getWinner());
-                    DatabaseManager.getInstance().updatePlayersScore(result);
+                    DatabaseManager.getInstance().updatePlayersScore(result.getWinner());
 
+                } else if (obj instanceof ExitFromGame) {
+                    ExitFromGame exit = (ExitFromGame) obj;
+                    endGame(exit);
+                    sendOnlineUsersToAll();
+                    if (exit.isIsGameRun()) {
+                        opponentSurrender(exit, exit.getOpp());
+                        DatabaseManager.getInstance().updatePlayersScore(exit.getOpp());
+                    }
+                    System.out.println("wlaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
                 }
             } catch (ClassNotFoundException ex) {
                 Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
@@ -280,4 +289,27 @@ public class ServerHandler implements Runnable {
         }
     }
 
+    void endGame(ExitFromGame exitFromGame) {
+
+        InGame.inGame.remove(exitFromGame.getWithdrawn());
+        InGame.inGame.remove(exitFromGame.getOpp());
+        OnlineUsersVector.onlineUsersVec.add(exitFromGame.getWithdrawn());
+        OnlineUsersVector.onlineUsersVec.add(exitFromGame.getOpp());
+
+    }
+
+    void opponentSurrender(ExitFromGame exitFromGame, String namString) {
+
+        for (ServerHandler sh : clientsVector) {
+            if (sh.username.equals(namString)) {
+                System.out.println(sh.username);
+                try {
+                    sh.ps.writeObject(exitFromGame);
+                } catch (IOException ex) {
+                    Logger.getLogger(ServerHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+
+    }
 }
