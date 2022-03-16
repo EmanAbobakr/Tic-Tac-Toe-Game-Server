@@ -5,11 +5,17 @@
  */
 package tictactoeserver;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 /**
  *
@@ -19,11 +25,27 @@ public class TicTacToeServer extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("FXMLDocument.fxml"));
+        Parent root = loader.load();
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.setResizable(false);
         stage.show();
+
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent we) {
+                System.out.println("Server is closing");
+                FXMLDocumentController controller = loader.getController();
+                try {
+                    controller.exitServer();
+                } catch (IOException ex) {
+                    Logger.getLogger(TicTacToeServer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                //sh.closeSockets();
+                stage.close();
+            }
+
+        });
     }
 
     /**

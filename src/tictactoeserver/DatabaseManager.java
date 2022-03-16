@@ -253,6 +253,8 @@ public class DatabaseManager {
             pst.setString(1, name);
             pst.executeUpdate();
             pst.close();
+            ServerHandler sh = new ServerHandler();
+            sh.sendScoreTableToAll();
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -288,6 +290,21 @@ public class DatabaseManager {
         }
         return false;
     }
+    
+    public void setAllOffline() {
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        try {
+            pst = con.prepareStatement("UPDATE UserTable SET isonline = false", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            pst.executeUpdate();
+            pst.close();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+    }
+    
 
     public void closeConnection() {
         try {

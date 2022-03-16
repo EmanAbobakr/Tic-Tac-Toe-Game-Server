@@ -151,9 +151,7 @@ public class ServerHandler implements Runnable {
 
                 } else if (obj instanceof GameResult) {
                     GameResult result = (GameResult) obj;
-//                    System.out.println(result.getPlayer1());
-//                    System.out.println(result.getPlayer2());
-//                    System.out.println(result.getWinner());
+                    sendOnlineUsersToAll();
                     DatabaseManager.getInstance().updatePlayersScore(result.getWinner());
 
                 } else if (obj instanceof ExitFromGame) {
@@ -211,7 +209,7 @@ public class ServerHandler implements Runnable {
         System.out.println("I send online users to all users");
     }
 
-    void sendScoreTableToAll() {
+    public void sendScoreTableToAll() {
         ScoreTable st = new ScoreTable();
         st.scores = DatabaseManager.getInstance().getPlayersWithScores();
         for (ServerHandler sh : clientsVector) {
