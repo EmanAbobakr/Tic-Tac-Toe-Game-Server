@@ -51,9 +51,14 @@ public class FXMLDocumentController implements Initializable, PieChartInterface 
 
     @FXML
     public void startServer(ActionEvent event) throws IOException {
+        
+        
 
         System.out.println("The server has started");
         DatabaseManager.getInstance().connection();
+        
+        DatabaseManager.getInstance().setAllOffline();
+        
         DatabaseManager.getInstance().piechartRef = this;
         pieChart();
         pieChartId.setVisible(true);
@@ -104,5 +109,21 @@ public class FXMLDocumentController implements Initializable, PieChartInterface 
         pieChartId.getData().add(new PieChart.Data("offline players", offlineUser));
 
         pieChartId.setTitle("Tic Tac Toe Statistics");
+    }
+    
+    public void exitServer() throws IOException {
+        if (Alerts.showInConfirmationAlert("Are you sure you want to close the server?")) {
+            ServerHandler.closeSockets();
+            server.serSoc.close();
+            pieChartId.setVisible(false);
+            pieChartId.getData().remove(0);
+            pieChartId.getData().remove(0);
+            DatabaseManager.getInstance().closeConnection();
+            startId.setDisable(false);
+            stopId.setDisable(true);
+            System.out.println("The server has closed");
+        }
+        System.out.println("The server still working");
+
     }
 }
